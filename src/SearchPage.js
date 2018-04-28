@@ -19,14 +19,18 @@ class SearchPage extends Component {
       BooksAPI.search(query).then((books) => {
           // if the BookAPI.search worked properly, this would be unnecessary
           if(books.length){
-              let temp = books;
 
-              this.props.booksOnShelf.forEach((bookOnShelf) => {
-              temp = temp.filter(b => b.id !== bookOnShelf.id )
-              });
+          books.forEach((book, index) => {
+            books[index].shelf = "none";
+            this.props.booksOnShelf.forEach((bookOnShelf) => {
+              if (book.id === bookOnShelf.id) {
+                books[index].shelf = bookOnShelf.shelf;
+          }
+            })
+          });
 
               this.setState({
-                  newBooks: temp
+                  newBooks: books
               });
 
           }else {
@@ -73,16 +77,14 @@ class SearchPage extends Component {
                             style={{
                               width: 128,
                               height: 193,
-                              backgroundImage: "url(" + book.imageLinks.thumbnail + ")"
+                              backgroundImage: book.imageLinks? "url(" + book.imageLinks.thumbnail + ")" : "grey"
                             }}
                           />
 
                           <div className="book-shelf-changer">
-                            <select value="null" onChange={e => {
+                            <select value={book.shelf} onChange={e => {
                               this.props.onChangeShelf(book, e.target.value);
-                              let temp = this.state.newBooks;
-                              temp.splice(temp.indexOf(book),1)
-                              this.setState({ newBooks: temp })
+                              book.shelf = e.target.value;
                               }
                             }>
                               <option value="null" disabled>
